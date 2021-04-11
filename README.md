@@ -1,3 +1,9 @@
-# example
+# qd_laser_dynamics
 
-This package is meant to be an example package to serve as a template for assignment 10 of the Physics 201: Data Analysis for Physicists course at Harvard in Spring 2020.
+Tool to analyze quantum dot lasing dynamics with Baysian methods
+
+To install this package, clone the repository, then use command line to navigate to the folder that contains setup.py and use the command
+
+```pip install -e .```
+
+This will install in development mode, so any changes made to the modules in qd_lasing_dynamics will take effect immediately.
