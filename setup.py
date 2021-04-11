@@ -7,5 +7,21 @@ setup(name='example',
       author='ralex0',
       author_email='ralex0@users.noreply.github.com',
       license='GPLv3',
+<<<<<<< Updated upstream
       packages=['example'],
       install_requires=['numpy'])
+=======
+      packages=['qd_laser_dynamics'],
+      install_requires=[
+          'numpy'
+          'pandas',
+          'scipy',
+          'matplotlib',
+          'emcee',
+          'nose',
+          'unittest'
+          ]
+      test_suite = 'nose.collector',
+      tests_require = ['nose'],
+      )
+>>>>>>> Stashed changes
