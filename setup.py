@@ -13,5 +13,11 @@ setup(name='qd_laser_dynamics',
           'pandas',
           'scipy',
           'matplotlib',
-          'emcee'
-          ])
+          'pymc3',
+          'emcee',
+          'nose',
+          'unittest'
+          ]
+      test_suite = 'nose.collector',
+      tests_require = ['nose'],
+      )
