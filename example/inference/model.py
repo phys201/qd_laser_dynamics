@@ -108,10 +108,8 @@ class LogLikelihood(Likelihood):
 
         residual = (self.y - S_out)**2
         chi_square = np.sum(residual/(self.sigma_y**2))
-        constant = np.sum(np.log(1/np.sqrt(2.0*np.pi*self.sigma_y**2)))
+        constant = np.sum(log(1/np.sqrt(2.0*np.pi*self.sigma_y**2)))
         return constant - 0.5*chi_square
     
-class Posterior(Likelihood):
-    ## NOT SURE ON THIS, NEEDS TO BE REVIEWED
     def logpost(self, xmin, xmax):
-        return UniformPrior(xmin, xmax).logp(self.theta) + logllh(self.theta, self.x, self.y, self.sigma_y)
+        return UniformPrior(xmin, xmax).logp(self.theta) + LogLikelihood(self.theta, self.x, self.y, self.sigma_y).logllh()
