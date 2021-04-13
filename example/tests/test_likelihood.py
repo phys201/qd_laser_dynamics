@@ -2,6 +2,7 @@ import unittest
 from example.inference.model import LogLikelihood
 from data_files.io import get_example_data_file_path, load_data
 import pandas as  pd
+import numpy as np
 
 class TestLikelihood(unittest.TestCase):
     '''
@@ -14,9 +15,8 @@ class TestLikelihood(unittest.TestCase):
         y = data.y.values
         sigma_y = data.sigma_y.values
         theta = 10**(-20) #C value in O'Brian et al. 2004
-        assert  0<= np.exp(LogLikelihood(theta, x, y, sigma_y)) < 1
+        assert  0<= np.exp(LogLikelihood(theta, x, y, sigma_y).logllh()) < 1
 
 
 if __name__ == '__main__':
-#    unittest.main()
-    nose.main()
+    unittest.main()
