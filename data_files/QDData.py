@@ -25,7 +25,7 @@ class QDData:
                 DataFrame holding the data loaded from the file (QDData)
         """
         self.filename = filepath
-        self._dataframe = pd.read_csv(filepath, encoding='utf-8', delimiter="\t", header=None)
+        self._dataframe = pd.read_csv(filepath, sep=',')
         
     def get_df(self):
         """
