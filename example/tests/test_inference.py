@@ -1,12 +1,16 @@
-from example.inference.prior import UniformPrior, JefferysPrior
+from qd_laser_dynamics import UniformPrior, JefferysPrior
 
 import numpy as np
 
 import unittest
 from unittest import TestCase
+import nose 
 
 
 class TestPriors(TestCase):
+    """
+    Class for testing functionality of the prior function works
+    """
     def test_uniform(self):
         assert np.allclose(np.exp(UniformPrior(3, 5).logp(4)), .5)
 
@@ -15,4 +19,5 @@ class TestPriors(TestCase):
                            0.0021714724095162588)
 
 if __name__ == '__main__':
-    unittest.main()
+#    unittest.main()
+    nosetests test_inference.py
