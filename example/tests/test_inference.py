@@ -20,4 +20,4 @@ class TestPriors(TestCase):
 
 if __name__ == '__main__':
 #    unittest.main()
-    nosetests test_inference.py
+    nose.main()
