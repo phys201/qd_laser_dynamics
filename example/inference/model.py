@@ -110,6 +110,3 @@ class LogLikelihood(Likelihood):
         chi_square = np.sum(residual/(self.sigma_y**2))
         constant = np.sum(log(1/np.sqrt(2.0*np.pi*self.sigma_y**2)))
         return constant - 0.5*chi_square
-    
-    def logpost(self, xmin, xmax):
-        return UniformPrior(xmin, xmax).logp(self.theta) + LogLikelihood(self.theta, self.x, self.y, self.sigma_y).logllh()
