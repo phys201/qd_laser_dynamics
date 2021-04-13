@@ -22,7 +22,7 @@ def load_data(data_file):
     loaded_data = QDData(data_file)
     return loaded_data
 
-def get_example_data_file_path(filename, data_dir=''):
+def get_example_data_file_path(filename, data_dir='data_files'):
     """
     Get the path to the example data file.
     Parameters:
