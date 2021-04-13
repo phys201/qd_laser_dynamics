@@ -1,6 +1,6 @@
 import unittest
-from qd_laser_dynamics import LogLikelihood
-from example.data_io import get_example_data_file_path, load_data
+from example.inference.model import LogLikelihood
+from data_files.io import get_example_data_file_path, load_data
 import pandas as  pd
 
 class TestLikelihood(unittest.TestCase):

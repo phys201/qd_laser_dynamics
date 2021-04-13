@@ -1,4 +1,4 @@
-from qd_laser_dynamics import UniformPrior, JefferysPrior
+from example.inference.model import UniformPrior, JefferysPrior
 
 import numpy as np
 
