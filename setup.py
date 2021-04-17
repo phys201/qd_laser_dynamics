@@ -1,23 +1,22 @@
 from setuptools import setup
 
-setup(name='qd_laser_dynamics',
+setup(name='qddynamics',
       version='1.0',
       description='Package to analyze Quantum Dot Lasing Dynamics',
       url='http://github.com/phys201/qd_laser_dynamics',
       author='Daniel Fernandez, Elizabeth Park, Alex Raun, and Hana Warner',
       author_email='dfernandez@g.harvard, spark3@g.harvard, raun@g.harvard.edu, hwarner@g.harvard.edu',
       license='GPLv3',
-      packages=['qd_laser_dynamics'],
+      packages=['qddynamics'],
       install_requires=[
-          'numpy'
+          'numpy',
           'pandas',
           'scipy',
           'matplotlib',
           'emcee',
           'nose',
-          'unittest'
-          ]
-      test_suite = 'nose.collector',
+          'unittest2',
+          ],
+      test_suite = 'nose.test',
       tests_require = ['nose'],
       )
-
