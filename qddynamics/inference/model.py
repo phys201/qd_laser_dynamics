@@ -37,11 +37,13 @@ class Likelihood:
     Prior Base class. This can store the shape parameters in the object instance 
     then be used as a function 
     """
-    def __init__(self, theta, x, y, sigma_y):
+    def __init__(self, theta, x, y, sigma_y, initial_guess):
         self.theta = theta
         self.x = x
         self.y = y
         self.sigma_y = sigma_y
+         ## Initial guesses for solving rate equations below
+        self.initial_guess = initial_guess
 
 
 class LogLikelihood(Likelihood):
@@ -78,8 +80,8 @@ class LogLikelihood(Likelihood):
 
         o = 0
         
-        ## Initial guesses for solving rate equations below
-        zGuess = np.array([1E18,0.5,1E15])
+       
+        zGuess = self.initial_guess
         
         ## solve the rate equations in steady state
         ## for each value of input current
@@ -110,6 +112,3 @@ class LogLikelihood(Likelihood):
         chi_square = np.sum(residual/(self.sigma_y**2))
         constant = np.sum(log(1/np.sqrt(2.0*np.pi*self.sigma_y**2)))
         return constant - 0.5*chi_square
-    
-    def logpost(self, xmin, xmax):
-        return UniformPrior(xmin, xmax).logp(self.theta) + LogLikelihood(self.theta, self.x, self.y, self.sigma_y).logllh()
