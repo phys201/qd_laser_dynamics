@@ -1,4 +1,4 @@
-# qd_laser_dynamics
+# qddynamics
 
 Tool to analyze quantum dot lasing dynamics with Baysian methods
 

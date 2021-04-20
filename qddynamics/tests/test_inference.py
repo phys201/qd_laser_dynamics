@@ -1,10 +1,10 @@
-from example.inference.model import UniformPrior, JefferysPrior
+from qddynamics.inference.model import UniformPrior, JefferysPrior
 
 import numpy as np
 
 import unittest
 from unittest import TestCase
-import nose 
+import nose
 
 
 class TestPriors(TestCase):

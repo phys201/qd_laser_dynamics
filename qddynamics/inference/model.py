@@ -4,8 +4,8 @@ from scipy.optimize import fsolve
 
 class Prior:
     """
-    Prior Base class. This can store the shape parameters in the object instance 
-    then be used as a function 
+    Prior Base class. This can store the shape parameters in the object instance
+    then be used as a function
     """
     def __init__(self, xmin, xmax):
         self.xmin = xmin
@@ -31,11 +31,11 @@ class JefferysPrior(Prior):
         return np.where(
             np.logical_and(x <= self.xmax, x >= self.xmin),
             -log(x) - log(log(self.xmax / self.xmin)), -np.inf)
-    
+
 class Likelihood:
     """
-    Prior Base class. This can store the shape parameters in the object instance 
-    then be used as a function 
+    Prior Base class. This can store the shape parameters in the object instance
+    then be used as a function
     """
     def __init__(self, theta, x, y, sigma_y):
         self.theta = theta
@@ -59,7 +59,7 @@ class LogLikelihood(Likelihood):
             sigma_y: uncertainties on y (array of length N)
         """
         C = self.theta
-        
+
         ## Constants--currently same constansts as used
         ## in O'Brien.
         Resc = 0
@@ -77,34 +77,34 @@ class LogLikelihood(Likelihood):
         N_out = []
 
         o = 0
-        
+
         ## Initial guesses for solving rate equations below
         zGuess = np.array([1E18,0.5,1E15])
-        
+
         ## solve the rate equations in steady state
         ## for each value of input current
-        for i in self.x:
-            def myFunction(z):
+        def myFunction(z, i):
+            S = z[0]
+            p = z[1]
+            N = z[2]
 
-                S = z[0]
-                p = z[1]
-                N = z[2]
+            F = np.empty((3))
+            F[0] = -(S/ts) + g0*v*(2*p - 1)*S
+            F[1] = -(p/td) - g0*(2*p - 1)*S + ((C)*(N**2) + (B*N))*(1-p) - Resc*p
+            F[2] = (i/q) - (N/tn) - 2*Nd*(((C)*(N**2) + (B*N))*(1-p) - Resc*p)
 
-                F = np.empty((3))
-                F[0] = -(S/ts) + g0*v*(2*p - 1)*S
-                F[1] = -(p/td) - g0*(2*p - 1)*S + ((C)*(N**2) + (B*N))*(1-p) - Resc*p
-                F[2] = (i/q) - (N/tn) - 2*Nd*(((C)*(N**2) + (B*N))*(1-p) - Resc*p)
-                return F
 
-            z = fsolve(myFunction,zGuess)
+            return F
 
-            S_out.append(z[0])
-            p_out.append(z[1])
-            N_out.append(z[2])
+        fout = lambda ip: fsolve(myFunction, zGuess, args = ip)
+        z = np.array(list(map(fout, self.x)))
 
-            zGuess = np.array([zGuess[0], z[1], z[2]])
+        S_out = z[:,0]
+        p_out = z[:,1]
+        N_out = z[:,2]
 
-            o+=1
+        # TODO: update zGuess for subsequent steps.  
+        #zGuess = np.array([zGuess[0], z[1], z[2]])
 
         residual = (self.y - S_out)**2
         chi_square = np.sum(residual/(self.sigma_y**2))

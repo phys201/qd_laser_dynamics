@@ -1,5 +1,5 @@
 import unittest
-from example.inference.model import LogLikelihood
+from qddynamics.inference.model import LogLikelihood
 from data_files.io import get_example_data_file_path, load_data
 import pandas as  pd
 import numpy as np
