@@ -60,13 +60,13 @@ class LogLikelihood(Likelihood):
             y: measurements (array of length N)
             sigma_y: uncertainties on y (array of length N)
         """
-        C = self.theta
+        C, Nd = self.theta
 
         ## Constants--currently same constansts as used
         ## in O'Brien.
         Resc = 0
         B = 0
-        Nd = 1E14 # m^-2
+        ## Nd = 1E14 # m^-2
         v = 2.4E22 #2*Nd*confinement_factor/d
         tn = 1E-9 # seconds
         td = tn
