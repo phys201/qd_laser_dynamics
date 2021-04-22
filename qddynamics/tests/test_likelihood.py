@@ -1,5 +1,5 @@
 import unittest
-from qddyamics.inference.model import LogLikelihood
+from qddynamics.inference.model import LogLikelihood
 from data_files.io import get_example_data_file_path, load_data
 import pandas as  pd
 import numpy as np
@@ -14,8 +14,10 @@ class TestLikelihood(unittest.TestCase):
         x = data.x.values
         y = data.y.values
         sigma_y = data.sigma_y.values
-        theta = 10**(-20) #C value in O'Brian et al. 2004
-        assert  0<= np.exp(LogLikelihood(theta, x, y, sigma_y).logllh()) < 1
+        initial_guess = np.array([2E21,0.5,1E15])
+        theta = (10**(-20), 2e15) #C, Nd value in O'Brian et al. 2004
+        print(LogLikelihood(theta, x, y, sigma_y, initial_guess).logllh())
+        assert  0<= np.exp(LogLikelihood(theta, x, y, sigma_y, initial_guess).logllh()) < 1
 
 
 if __name__ == '__main__':

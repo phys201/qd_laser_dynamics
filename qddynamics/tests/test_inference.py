@@ -4,7 +4,7 @@ import numpy as np
 
 import unittest
 from unittest import TestCase
-import nose 
+import nose
 
 
 class TestPriors_value(TestCase):
@@ -18,7 +18,7 @@ class TestPriors_value(TestCase):
         assert np.allclose(np.exp(JefferysPrior(10, 1000).logp(100)),
                            0.0021714724095162588)
 
-class TestPriors_limit(Testcase):
+class TestPriors_limit(TestCase):
     """
     Class for testing the limit of the prior classes.
     See if inserting the value that is off from limits still makes sense.
@@ -26,8 +26,8 @@ class TestPriors_limit(Testcase):
     def test_uniform_limit(self):
         assert np.allclose(np.exp(UniformPrior(3,5).logp(8)), 0)
     def test_jefferys_limit(self):
-        assert np.allclose(np.exp(JeffreysPrior(10,1000).logp(1)), 0)
-        
+        assert np.allclose(np.exp(JefferysPrior(10,1000).logp(1)), 0)
+
 
 
 
