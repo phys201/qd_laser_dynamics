@@ -86,7 +86,18 @@ class LogLikelihood(Likelihood):
         ## solve the rate equations in steady state
         ## for each value of input current
 
-        def myFunction(z, i):
+        def rateEquations(z, i):
+            '''
+            Differential equations that describe the lasing behaviour of quantum dots
+            for a given input current
+            -------------
+            Parameters:
+            z := ndarray
+                initial guess for solutions
+            i := ndarray
+                input currents
+            '''
+
             S = z[0]
             p = z[1]
             N = z[2]*i/self.x[0]
@@ -99,7 +110,7 @@ class LogLikelihood(Likelihood):
 
             return F
 
-        fout = lambda ip: fsolve(myFunction, zGuess, args = ip)
+        fout = lambda ip: fsolve(rateEquations, zGuess, args = ip)
         z = np.array(list(map(fout, self.x)))
 
         S_out = z[:,0]
