@@ -46,7 +46,7 @@ class Likelihood:
 
 class LogLikelihood(Likelihood):
     """
-    Returns the log likelihood of the model given the likelihood defined above
+    Returns the log likelihood of the model given the likelihood defined above.  
     """
     def logllh(self):
         """
