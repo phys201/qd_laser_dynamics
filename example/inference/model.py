@@ -46,7 +46,7 @@ class Likelihood:
 
 class LogLikelihood(Likelihood):
     """
-    Returns the value of the uniform prior at position x for range xmin to xmax
+    Returns the log likelihood of the model given the likelihood defined above
     """
     def logllh(self):
         """
