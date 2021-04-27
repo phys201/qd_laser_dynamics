@@ -34,8 +34,7 @@ class JefferysPrior(Prior):
 
 class Likelihood:
     """
-    Prior Base class. This can store the shape parameters in the object instance
-    then be used as a function
+    Returns the likelihood of the model.
     """
     def __init__(self, theta, x, y, sigma_y, initial_guess):
         self.theta = theta
@@ -48,7 +47,7 @@ class Likelihood:
 
 class LogLikelihood(Likelihood):
     """
-    Returns the value of the uniform prior at position x for range xmin to xmax
+    Returns the log of the likelihood given the likelihood defined above.
     """
     def logllh(self):
         """
