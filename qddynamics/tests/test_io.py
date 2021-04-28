@@ -2,6 +2,7 @@ from unittest import TestCase
 import nose
 from data_files.io import get_example_data_file_path, load_data
 import pandas as  pd
+import unittest
 
 class TestIo(TestCase):
     def test_data_io(self):
@@ -9,5 +10,5 @@ class TestIo(TestCase):
         assert data.x[0] == 270526
 #
 if __name__ == '__main__':
-    #unittest.main()
-    nose.main()
+    unittest.main()
+    #nose.main()
