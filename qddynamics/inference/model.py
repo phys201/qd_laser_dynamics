@@ -223,3 +223,4 @@ class Posterior:
     def plot_parameters(self, parameter_samples):
         '''plot KDE of paramters when given chains'''
         joint_kde = sns.jointplot(x='C', y='Nd', data=parameter_samples, kind='scatter', s=0.2)
+        return joint_kde.x.name
