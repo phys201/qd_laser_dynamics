@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import log
 from scipy.optimize import fsolve
+import emcee
 
 class Prior:
     """
@@ -120,3 +121,33 @@ class LogLikelihood(Likelihood):
         chi_square = np.sum(residual/(self.sigma_y**2))
         constant = np.sum(log(1/np.sqrt(2.0*np.pi*self.sigma_y**2)))
         return constant - 0.5*chi_square
+
+class Posterior:
+     def __init__(self, theta, x, y, sigma_y,initial_guess, prior_upbnd_C, prior_lowerbnd_C, prior_upbnd_Nd, prior_lowerbnd_Nd):
+        self.theta = theta
+        self.x = x
+        self.y = y
+        self.sigma_y = sigma_y
+        self.initial_guess = initial_guess
+        self.prior_up_C = prior_upbnd_C
+        self.prior_low_C = prior_lowerbnd_C
+        self.prior_up_Nd = prior_upbnd_Nd
+        self.prior_low_Nd = prior_lowerbnd_Nd
+    def logp(self):
+        theta = self.theta
+        C, Nd = self.theta
+        up_bnd_C, low_bnd_C = self.prior_up_C, self.prior_low_C
+        up_bnd_Nd, low_bnd_Nd = self.prior_up_Nd, self.prior_low_Nd    
+        log_prior = UniformPrior(low_bnd_C, up_bnd_C).logp(C) + UniformPrior(low_bnd_Nd, up_bnd_Nd).logp(Nd)
+        log_likelihood = LogLikelihood(theta, self.x, self.y, self.sigma_y, self_initial_guess).logllh()
+        return log_prior+log_likelihood
+
+     def run_mcmc(self,ndim, nwalkers, nsteps, ls_result,gaussian_ball_size):
+        gaussian_ball = gaussian_ball_size * np.random.randn(nwalkers, ndim)
+        starting_positions = (1 + gaussian_ball) * ls_result
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, Posterior.logp(), 
+                                args=(posterior))
+        # run the sampler. We use iPython's %time directive to tell us 
+        # how long it took (in a script, you would leave out "%time")
+        %time sampler.run_mcmc(starting_positions, nsteps)
+        print('Done')
