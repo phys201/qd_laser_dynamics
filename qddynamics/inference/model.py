@@ -2,6 +2,7 @@ import numpy as np
 from numpy import log
 from scipy.optimize import fsolve
 
+
 class Prior:
     """
     Prior Base class. This can store the shape parameters in the object instance
@@ -32,9 +33,9 @@ class JefferysPrior(Prior):
             np.logical_and(x <= self.xmax, x >= self.xmin),
             -log(x) - log(log(self.xmax / self.xmin)), -np.inf)
 
-class Likelihood:
+class LogLikelihood:
     """
-    Returns the likelihood of the model.
+    Returns the log of the likelihood of the model.
     """
     def __init__(self, theta, x, y, sigma_y, initial_guess):
         self.theta = theta
@@ -44,11 +45,6 @@ class Likelihood:
          ## Initial guesses for solving rate equations below
         self.initial_guess = initial_guess
 
-
-class LogLikelihood(Likelihood):
-    """
-    Returns the log of the likelihood given the likelihood defined above.
-    """
     def logllh(self):
         """
         returns log of likelihood

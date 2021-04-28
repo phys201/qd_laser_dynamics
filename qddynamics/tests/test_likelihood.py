@@ -16,9 +16,8 @@ class TestLikelihood(unittest.TestCase):
         sigma_y = data.sigma_y.values
         initial_guess = np.array([2E21,0.5,1E15])
         theta = (10**(-20), 2e15) #C, Nd value in O'Brian et al. 2004
-        print(LogLikelihood(theta, x, y, sigma_y, initial_guess).logllh())
         assert  0<= np.exp(LogLikelihood(theta, x, y, sigma_y, initial_guess).logllh()) < 1
 
-
+    
 if __name__ == '__main__':
     unittest.main()
