@@ -21,6 +21,12 @@ class UniformPrior(Prior):
     Returns the value of the uniform prior at position x for range xmin to xmax
     """
     def logp(self, x):
+        '''
+        Parameters:
+        --------
+        x: ndarray
+        returns: uniform prior probability
+        '''
         return np.where(
             np.logical_and(x <= self.xmax, x >= self.xmin),
             -log(self.xmax - self.xmin), -np.inf)
@@ -32,6 +38,12 @@ class JefferysPrior(Prior):
     """
 
     def logp(self, x):
+        '''
+        Parameters:
+        --------
+        x: ndarray
+        returns: jefferys prior probability
+        '''
         return np.where(
             np.logical_and(x <= self.xmax, x >= self.xmin),
             -log(x) - log(log(self.xmax / self.xmin)), -np.inf)
@@ -45,8 +57,30 @@ class LogLikelihood:
         self.x = x
         self.y = y
         self.sigma_y = sigma_y
-         ## Initial guesses for solving rate equations below
         self.initial_guess = initial_guess
+
+    def rateEquations(self, z, i):
+        '''
+        Differential equations that describe the lasing behaviour of quantum dots
+        for a given input current
+
+        Returns solutions to differential equations for lasing rates in steady state
+        -------------
+        Parameters:
+        z := ndarray
+            initial guess for solutions
+        i := ndarray
+            input currents
+        '''
+        S = z[0]
+        p = z[1]
+        N = z[2]*i/self.x[0]
+
+        F = np.empty((3))
+        F[0] = -(S/ts) + g0*v*(2*p - 1)*S
+        F[1] = -(p/td) - g0*(2*p - 1)*S + ((C)*(N**2) + (B*N))*(1-p) - Resc*p
+        F[2] = (i/q) - (N/tn) - 2*Nd*(((C)*(N**2) + (B*N))*(1-p) - Resc*p)
+        return F
 
     def logllh(self):
         """
@@ -78,37 +112,9 @@ class LogLikelihood:
 
         o = 0
 
-
         zGuess = self.initial_guess
 
-        ## solve the rate equations in steady state
-        ## for each value of input current
-
-        def rateEquations(z, i):
-            '''
-            Differential equations that describe the lasing behaviour of quantum dots
-            for a given input current
-            -------------
-            Parameters:
-            z := ndarray
-                initial guess for solutions
-            i := ndarray
-                input currents
-            '''
-
-            S = z[0]
-            p = z[1]
-            N = z[2]*i/self.x[0]
-
-            F = np.empty((3))
-            F[0] = -(S/ts) + g0*v*(2*p - 1)*S
-            F[1] = -(p/td) - g0*(2*p - 1)*S + ((C)*(N**2) + (B*N))*(1-p) - Resc*p
-            F[2] = (i/q) - (N/tn) - 2*Nd*(((C)*(N**2) + (B*N))*(1-p) - Resc*p)
-
-
-            return F
-
-        fout = lambda ip: fsolve(rateEquations, zGuess, args = ip)
+        fout = lambda ip: fsolve(self.rateEquations, zGuess, args = ip)
         z = np.array(list(map(fout, self.x)))
 
         S_out = z[:,0]
@@ -123,6 +129,7 @@ class LogLikelihood:
 class Posterior:
     '''
     class for computing posterior given lasing rate model
+    returns posterior probability
     Parameters
     -----------
     theta: lasing rate starting point
@@ -151,7 +158,8 @@ class Posterior:
             Photoluminescence of quantum dots
         sigma_y: ndarray
             uncertainty on measurement
-
+        returns: ndarray
+            log of posterior probability
         '''
         C, Nd = self.CN_exp
         C_lower, C_upper = self.C_bounds
@@ -178,14 +186,14 @@ class Posterior:
             number of walkers
         nsteps: int
             number of steps
+        returns: DataFrame
+            data frame of parameter sampler chains
         '''
-        ndim = 2 # model has 2 parameters
+        ndim = 2
         gaussian_ball = 1e-4 * np.random.randn(nwalkers, ndim)
         starting_positions = (1 + gaussian_ball) * ls_result
-        # set up the sampler object
         sampler = emcee.EnsembleSampler(nwalkers, ndim,self.log_posterior,
                                         args=(x, y, sigma_y))
-        # run the sampler. We use iPython's %time directive to tell us
         sampler.run_mcmc(starting_positions, nsteps)
         print('Done')
         if plot_chains:
@@ -193,24 +201,25 @@ class Posterior:
             ax_C.set(ylabel='C')
             ax_Nd.set(ylabel='Nd')
             for i in range(50):
-                # to use seaborn's lineplot, we first need to make a dataframe
                 df = pd.DataFrame({'C': sampler.chain[i,:,0], 'Nd':sampler.chain[i,:,1]})
                 sns.lineplot(data=df, x=df.index, y='C', ax=ax_C)
                 sns.lineplot(data=df, x=df.index, y='Nd', ax=ax_Nd)
 
         samples = sampler.chain[:,100:,:]
-        # reshape the samples into a 1D array where the colums are m and b
         traces = samples.reshape(-1, ndim).T
-        # create a pandas DataFrame with labels.  This will come in handy
-        # in a moment, when we start using seaborn to plot our results
-        # (among other things, it saves us the trouble of typing in labels
-        # for our plots)
         parameter_samples = pd.DataFrame({'C': traces[0], 'Nd': traces[1]})
         return parameter_samples
 
     def extract_parameters(self, parameter_samples):
-        ''' extract MAP from paramter chains'''
-        # calculating the MAP and values can be done concisely using pandas
+        '''
+        extract MAP from parameter chains
+        parameters:
+        -----------
+        parameter_samples: DataFrame
+            sampler chains from MCMC
+        returns: ndarray
+            MAP Values for parameter estimation
+        '''
         q = parameter_samples.quantile([0.16,0.50,0.84], axis=0)
         print("C = {:.2e} + {:.2e} - {:.2e}".format(q['C'][0.50],
                                                     q['C'][0.84]-q['C'][0.50],
@@ -221,6 +230,14 @@ class Posterior:
         return q
 
     def plot_parameters(self, parameter_samples):
-        '''plot KDE of paramters when given chains'''
+        '''
+        plot KDE of parameters when given chains
+        parameters
+        ---------
+        paramter_samples: DataFrame
+            data frame of sampler chains from MCMC Sampler
+        returns: str
+            variable plotted on x axis
+        '''
         joint_kde = sns.jointplot(x='C', y='Nd', data=parameter_samples, kind='scatter', s=0.2)
         return joint_kde.x.name
