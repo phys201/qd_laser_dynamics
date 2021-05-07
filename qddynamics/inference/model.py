@@ -72,6 +72,20 @@ class LogLikelihood:
         i := ndarray
             input currents
         '''
+        C, Nd = self.theta
+
+        ## Constants--currently same constansts as used
+        ## in O'Brien.
+        Resc = 0
+        B = 0
+        ## Nd = 1E14 # m^-2
+        v = 2.4E22 #2*Nd*confinement_factor/d
+        tn = 1E-9 # seconds
+        td = tn
+        ts = 3E-12 # seconds
+        g0 = 0.15E-10 # m^3/seconds
+        q = 1.60217662E-19 # Charge of electron (coulombs)
+
         S = z[0]
         p = z[1]
         N = z[2]*i/self.x[0]
@@ -92,19 +106,7 @@ class LogLikelihood:
             y: measurements (array of length N)
             sigma_y: uncertainties on y (array of length N)
         """
-        C, Nd = self.theta
 
-        ## Constants--currently same constansts as used
-        ## in O'Brien.
-        Resc = 0
-        B = 0
-        ## Nd = 1E14 # m^-2
-        v = 2.4E22 #2*Nd*confinement_factor/d
-        tn = 1E-9 # seconds
-        td = tn
-        ts = 3E-12 # seconds
-        g0 = 0.15E-10 # m^3/seconds
-        q = 1.60217662E-19 # Charge of electron (coulombs)
 
         S_out = []
         p_out = []
