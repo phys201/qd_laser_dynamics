@@ -18,5 +18,5 @@ setup(name='qddynamics',
           'unittest2',
           ],
       test_suite = 'nose.test',
-      tests_require = ['nose'],
+      tests_require = ['nose']
       )
