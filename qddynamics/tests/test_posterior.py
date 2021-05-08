@@ -1,6 +1,6 @@
 import unittest
 from qddynamics.inference.model import Posterior
-from data_files.io import get_example_data_file_path, load_data
+from qddynamics.io import get_example_data_file_path, load_data
 import pandas as  pd
 import numpy as np
 
