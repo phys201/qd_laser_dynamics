@@ -85,7 +85,7 @@ class TestPosterior(unittest.TestCase):
         returns the proper x-column name, or "C".
         '''
         fpath = '..\data_files'
-        data = load_data(get_example_data_file_path('\simulated_data_csv.csv'))
+        data = load_data(get_example_data_file_path(fpath+'\simulated_data_csv.csv'))
         x = data.x.values
         #Posterior.y = data.y.values
         y = data.y.values
