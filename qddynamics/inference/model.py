@@ -72,18 +72,21 @@ class LogLikelihood:
         i := ndarray
             input currents
         '''
-        C, Nd = self.theta
+        C, Nd, g0 = self.theta
 
         ## Constants--currently same constansts as used
         ## in O'Brien.
         Resc = 0
         B = 0
         ## Nd = 1E14 # m^-2
-        v = 2.4E22 #2*Nd*confinement_factor/d
+        confinement_factor = 0.06 # this is questionable
+        d = 10E-9 # Thickness of quantum well/quantum dot layer
+        v = 2*Nd*confinement_factor/d
+        #v = 2.4E22
         tn = 1E-9 # seconds
         td = tn
         ts = 3E-12 # seconds
-        g0 = 0.15E-10 # m^3/seconds
+        #g0 = 0.15E-10 # m^3/seconds
         q = 1.60217662E-19 # Charge of electron (coulombs)
 
         S = z[0]
@@ -144,11 +147,12 @@ class Posterior:
     CN_exp: tuple
         expected C and Nd
     '''
-    def __init__(self, initial_guess, C_bounds, Nd_bounds, CN_exp):
+    def __init__(self, initial_guess, C_bounds, Nd_bounds, g0_bounds, CNg0_exp):
         self.initial_guess = initial_guess
         self.C_bounds = C_bounds
         self.Nd_bounds = Nd_bounds
-        self.CN_exp = CN_exp
+        self.g0_bounds = g0_bounds
+        self.CNg0_exp = CNg0_exp
 
     def log_posterior(self, theta, x, y, sigma_y):
         '''
@@ -163,13 +167,15 @@ class Posterior:
         returns: ndarray
             log of posterior probability
         '''
-        C, Nd = self.CN_exp
+        C, Nd, g0 = self.CNg0_exp
         C_lower, C_upper = self.C_bounds
         Nd_lower, Nd_upper = self.Nd_bounds
+        g0_lower, g0_upper = self.g0_bounds
         Nd_prior = UniformPrior(Nd_lower, Nd_upper).logp(Nd)
         C_prior =  UniformPrior(C_lower, C_upper).logp(C)
+        g0_prior = UniformPrior(g0_lower, g0_upper).logp(g0)
         likelihood = LogLikelihood(theta, x, y, sigma_y, self.initial_guess).logllh()
-        return Nd_prior + C_prior + likelihood
+        return Nd_prior + C_prior + g0_prior + likelihood
 
     def mc(self, x, y, sigma_y, ls_result, nwalkers=50, nsteps=500, plot_chains=True):
         '''
@@ -191,7 +197,7 @@ class Posterior:
         returns: DataFrame
             data frame of parameter sampler chains
         '''
-        ndim = 2
+        ndim = 3
         gaussian_ball = 1e-4 * np.random.randn(nwalkers, ndim)
         starting_positions = (1 + gaussian_ball) * ls_result
         sampler = emcee.EnsembleSampler(nwalkers, ndim,self.log_posterior,
@@ -199,18 +205,20 @@ class Posterior:
         sampler.run_mcmc(starting_positions, nsteps)
         print('Done')
         if plot_chains:
-            fig, (ax_C, ax_Nd) = plt.subplots(2)
+            fig, (ax_C, ax_Nd, ax_g0) = plt.subplots(3)
             ax_C.set(ylabel='C')
             ax_Nd.set(ylabel='Nd')
+            ax_g0.set(ylabel='g0')
             for i in range(50):
-                df = pd.DataFrame({'C': sampler.chain[i,:,0], 'Nd':sampler.chain[i,:,1]})
+                df = pd.DataFrame({'C': sampler.chain[i,:,0], 'Nd':sampler.chain[i,:,1], 'g0':sampler.chain[i,:,2]})
                 sns.lineplot(data=df, x=df.index, y='C', ax=ax_C)
                 sns.lineplot(data=df, x=df.index, y='Nd', ax=ax_Nd)
+                sns.lineplot(data=df, x=df.index, y='g0', ax=ax_g0)
 
         samples = sampler.chain[:,100:,:]
         traces = samples.reshape(-1, ndim).T
-        parameter_samples = pd.DataFrame({'C': traces[0], 'Nd': traces[1]})
-        return parameter_samples
+        parameter_samples = pd.DataFrame({'C': traces[0], 'Nd': traces[1], 'g0': traces[2]})
+        return parameter_samples, sampler
 
     def extract_parameters(self, parameter_samples):
         '''
@@ -229,6 +237,9 @@ class Posterior:
         print("Nd = {:.2e} + {:.2e} - {:.2e}".format(q['Nd'][0.50],
                                                     q['Nd'][0.84]-q['Nd'][0.50],
                                                     q['Nd'][0.50]-q['Nd'][0.16]))
+        print("g0 = {:.2e} + {:.2e} - {:.2e}".format(q['g0'][0.50],
+                                                    q['g0'][0.84]-q['g0'][0.50],
+                                                    q['g0'][0.50]-q['g0'][0.16]))
         return q
 
     def plot_parameters(self, parameter_samples):
