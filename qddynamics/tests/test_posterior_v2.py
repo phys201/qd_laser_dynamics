@@ -5,7 +5,7 @@ import pandas as  pd
 import numpy as np
 
 
-class TestPosteriorLessInfer(unittest.TestCase):
+class TestPosterior_v2(unittest.TestCase):
     '''
     Class for testing functionality of the likelihood function
     Loads the real data of x, y, sigma_y, and make sure that for a reasonable theta, likelihood does not diverge
@@ -51,7 +51,7 @@ class TestPosteriorLessInfer(unittest.TestCase):
         ls_result = [0.8e-20, 1.5E14]
         theta = (10**(-20), 2e15) #C, Nd value in O'Brian et al. 2004
         logpost = Posterior(initial_guess, C_bounds, Nd_bounds, CN_exp)
-        param_chain = logpost.mc(x,y, sigma_y, ls_result, plot_chains=False)
+        param_chain = logpost.mc(x,y, sigma_y, ls_result, nwalkers = 5, nsteps = 300, plot_chains=False)
         params =  logpost.extract_parameters(param_chain)
         assert 8e-21 <= params['C'][0.5] <= 11e-21
         assert 7e13 <= params['Nd'][0.5] <= 12e13
