@@ -79,10 +79,7 @@ class LogLikelihood:
         Resc = 0
         B = 0
         ## Nd = 1E14 # m^-2
-        confinement_factor = 0.06 # this is questionable
-        d = 10E-9 # Thickness of quantum well/quantum dot layer
-        v = 2*Nd*confinement_factor/d
-        #v = 2.4E22
+        v = 2.4E22
         tn = 1E-9 # seconds
         td = tn
         ts = 3E-12 # seconds
