@@ -79,21 +79,27 @@ class LogLikelihood:
         Resc = 0
         B = 0
         ## Nd = 1E14 # m^-2
-        v = 2.4E22
-        tn = 1E-9 # seconds
+        confinement_factor = 0.09 # this is questionable
+        d = 1E-9 # Thickness of quantum well/quantum dot layer
+        v = 2*Nd*confinement_factor/d
+        #v = 2.4E22
+        tn = 3E-9 # seconds
         td = tn
-        ts = 3E-12 # seconds
+        ts = 9E-12 # seconds
         #g0 = 0.15E-10 # m^3/seconds
+        #g0 = 1.66706437178E-8
         q = 1.60217662E-19 # Charge of electron (coulombs)
 
         S = z[0]
         p = z[1]
-        N = z[2]*i/self.x[0]
-
+        N = z[2]+(list(self.x).index(i))*(3.5e14)
+        
+        # *i/self.x[0]
+        
         F = np.empty((3))
         F[0] = -(S/ts) + g0*v*(2*p - 1)*S
         F[1] = -(p/td) - g0*(2*p - 1)*S + ((C)*(N**2) + (B*N))*(1-p) - Resc*p
-        F[2] = (i/q) - (N/tn) - 2*Nd*(((C)*(N**2) + (B*N))*(1-p) - Resc*p)
+        F[2] = ((i-0.3E7)/q) - (N/tn) - 2*Nd*(((C)*(N**2) + (B*N))*(1-p) - Resc*p)
         return F
 
     def logllh(self):
@@ -106,7 +112,7 @@ class LogLikelihood:
             y: measurements (array of length N)
             sigma_y: uncertainties on y (array of length N)
         """
-
+        scaling_factor = 1E2
 
         S_out = []
         p_out = []
@@ -119,7 +125,7 @@ class LogLikelihood:
         fout = lambda ip: fsolve(self.rateEquations, zGuess, args = ip)
         z = np.array(list(map(fout, self.x)))
 
-        S_out = z[:,0]
+        S_out = z[:,0]*scaling_factor
         p_out = z[:,1]
         N_out = z[:,2]
 
@@ -174,7 +180,7 @@ class Posterior:
         likelihood = LogLikelihood(theta, x, y, sigma_y, self.initial_guess).logllh()
         return Nd_prior + C_prior + g0_prior + likelihood
 
-    def mc(self, x, y, sigma_y, ls_result, nwalkers=50, nsteps=500, plot_chains=True):
+    def mc(self, x, y, sigma_y, ls_result, nwalkers=50, nsteps=1000, plot_chains=True):
         '''
         Uses emcee to do MCMC sampling to find estimate C and Nd parameters given model
         Paramters
@@ -215,7 +221,7 @@ class Posterior:
         samples = sampler.chain[:,100:,:]
         traces = samples.reshape(-1, ndim).T
         parameter_samples = pd.DataFrame({'C': traces[0], 'Nd': traces[1], 'g0': traces[2]})
-        return parameter_samples, sampler
+        return parameter_samples, sampler, starting_positions
 
     def extract_parameters(self, parameter_samples):
         '''
