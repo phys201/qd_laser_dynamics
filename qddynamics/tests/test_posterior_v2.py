@@ -22,15 +22,17 @@ class TestPosterior_v2(unittest.TestCase):
         y = data.y.values
         sigma_y = data.sigma_y.values
         initial_guess = np.array([2E21,0.5,1E15])
-        CN_exp = (10e-20, 1e14)
+        g0_bounds = (0.15E-13, 0.15E-7)
+        CNg0_exp = (10e-20, 1e14, 0.15E-10)
         C_bounds = (10e-21, 10e-19)
         Nd_bounds = (1E13, 1E15)
-        initial_guess = np.array([2E21,0.5,1E15])
-        ls_result = [0.8e-20, 1.5E14]
-        theta = (10**(-20), 2e15) #C, Nd value in O'Brian et al. 2004
-        logpost = Posterior(initial_guess, C_bounds, Nd_bounds, CN_exp)
+        
+        ls_result = [0.8e-20, 1.5E14, 0.15E-10]
+        theta = (10**(-20), 2e15, 0.15E-10) #C, Nd value in O'Brian et al. 2004
+        logpost = Posterior(initial_guess, C_bounds, Nd_bounds, g0_bounds, CNg0_exp)
         post = logpost.log_posterior(theta, x, y, sigma_y)
-        assert post == -2127.8337330441004
+        assert ~np.isnan(post)
+        assert -3000 < post < -2000
 
     def test_parameters_C(self):
         '''
@@ -44,18 +46,20 @@ class TestPosterior_v2(unittest.TestCase):
         y = data.y.values
         sigma_y = data.sigma_y.values
         initial_guess = np.array([2E21,0.5,1E15])
-        CN_exp = (10e-20, 1e14)
+        g0_bounds = (0.15E-13, 0.15E-7)
+        CNg0_exp = (10e-20, 1e14, 0.15E-10)
         C_bounds = (10e-21, 10e-19)
         Nd_bounds = (1E13, 1E15)
-        initial_guess = np.array([2E21,0.5,1E15])
-        ls_result = [0.8e-20, 1.5E14]
-        theta = (10**(-20), 2e15) #C, Nd value in O'Brian et al. 2004
-        logpost = Posterior(initial_guess, C_bounds, Nd_bounds, CN_exp)
-        param_chain = logpost.mc(x,y, sigma_y, ls_result, nwalkers = 5, nsteps = 300, plot_chains=False)
-        params =  logpost.extract_parameters(param_chain)
-        assert 8e-21 <= params['C'][0.5] <= 11e-21
-        assert 7e13 <= params['Nd'][0.5] <= 12e13
-        assert logpost.plot_parameters(param_chain) == 'C'
+        
+        ls_result = [0.8e-20, 1.5E14, 0.15E-10]
+        theta = (10**(-20), 2e15, 0.15E-10) #C, Nd value in O'Brian et al. 2004
+        logpost = Posterior(initial_guess, C_bounds, Nd_bounds, g0_bounds, CNg0_exp)
+        param_chain = logpost.mc(x,y, sigma_y, ls_result, nwalkers = 7, nsteps = 300, plot_chains=False)
+        params =  logpost.extract_parameters(param_chain[0])
+        assert 5e-21 <= params['C'][0.5] <= 10e-21
+        assert 7e13 <= params['Nd'][0.5] <= 15e13
+        assert 0.15E-13 <= params['g0'][0.5]<=0.15E-7
+        assert logpost.plot_parameters(param_chain[0]) == 'C'
         
 
 if __name__ == '__main__':

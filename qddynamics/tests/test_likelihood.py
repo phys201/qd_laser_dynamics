@@ -16,7 +16,7 @@ class TestLikelihood(unittest.TestCase):
         y = data.y.values
         sigma_y = data.sigma_y.values
         initial_guess = np.array([2E21,0.5,1E15])
-        theta = (10**(-20), 2e15) #C, Nd value in O'Brian et al. 2004
+        theta = (10**(-20), 2e15, 0.15E-10) #C, Nd value in O'Brian et al. 2004
         assert  0<= np.exp(LogLikelihood(theta, x, y, sigma_y, initial_guess).logllh()) < 1
         
     def test_rate_equation_isnan(self):
@@ -30,7 +30,7 @@ class TestLikelihood(unittest.TestCase):
         y = data.y.values
         sigma_y = data.sigma_y.values
         initial_guess = np.array([2E21,0.5,1E15])
-        theta = (10**(-20), 2e15) #C, Nd value in O'Brian et al. 2004
+        theta = (10**(-20), 2e15, 0.15E-10) #C, Nd value in O'Brian et al. 2004
         i = np.array([1.75368533e-06]) #A test value that we know will return a meaningful value
         assert ~np.isnan(LogLikelihood(theta,x,y,sigma_y,initial_guess).rateEquations(initial_guess, i)).all()
 
