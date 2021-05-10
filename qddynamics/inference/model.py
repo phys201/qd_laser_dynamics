@@ -7,33 +7,8 @@ import pandas as pd
 import seaborn as sns
 import statsmodels.formula.api as smf
 
-  
-def linear_fit(x, y, sigma_y, data, g0 = 0.15E-10):       
-    inverse_variance = 1./(sigma_y ** 2)
-    linear_model = smf.wls(formula='y~x', data = data, weights=inverse_variance)
-    linear_result = linear_model.fit(cov_type='fixed_scale')
-    print(linear_result.params)
-    parameter_ftn = linear_result.params.array
-    #Solving the equation, the gradient is tau_s/theta the intercept -tau_s/theta*(N/tau_n+2*Nd*rho/tau_d)
-    ## Nd = 1E14 # m^-2
-    v = 2.4E22
-    tn = 1E-9 # seconds
-    td = tn
-    ts = 3E-12 # seconds
-   # g0 = 0.15E-10 # m^3/seconds
-    q = 1.60217662E-19 # Charge of electron (coulombs)
-    p = 0.9
-    theta = 1/g0/(2p-1)/tau_s
-    N = g0*y[0]/x[0]
-    theta = tau_s/parameter_ftn[1]
-    p = (1/g0/theta/tau_s+1)/2
-    parameter_ftn[0]+x_data*parameter_ftn[1]
 
-    N_d = (parameter_ftn[0]*(0-theta/tau_s)-N/tau_n)/2/p*tau_d
-    C = (p/tau_d+np.average(x)/tau_s/v)/(1-p)/N**2
 
-    Isresult = np.array([Nd,C])
-    return Isresult
 
 class Prior:
     """
@@ -268,7 +243,7 @@ class Posterior:
                                                     q['g0'][0.50]-q['g0'][0.16]))
         return q
 
-    def plot_parameters(self, parameter_samples):
+    def plot_parameters(self, parameter_samples, xname = 'C', yname = 'Nd'):
         '''
         plot KDE of parameters when given chains
         parameters
@@ -278,5 +253,33 @@ class Posterior:
         returns: str
             variable plotted on x axis
         '''
-        joint_kde = sns.jointplot(x='C', y='Nd', data=parameter_samples, kind='scatter', s=0.2)
+        joint_kde = sns.jointplot(x=xname, y=yname, data=parameter_samples, kind='scatter', s=0.2)
         return joint_kde.x.name
+
+
+def linear_fit(x, y, sigma_y, data, g0 = 0.15E-10):
+    inverse_variance = 1./(sigma_y ** 2)
+    linear_model = smf.wls(formula='y~x', data = data, weights=inverse_variance)
+    linear_result = linear_model.fit(cov_type='fixed_scale')
+    print(linear_result.params)
+    parameter_ftn = linear_result.params.array
+    #Solving the equation, the gradient is tau_s/theta the intercept -tau_s/theta*(N/tau_n+2*Nd*rho/tau_d)
+    ## Nd = 1E14 # m^-2
+    v = 2.4E22
+    tn = 1E-9 # seconds
+    td = tn
+    ts = 3E-12 # seconds
+   # g0 = 0.15E-10 # m^3/seconds
+    q = 1.60217662E-19 # Charge of electron (coulombs)
+    p = 0.9
+    #theta = 1/g0/(2*p-1)/ts
+    N = g0*y[0]/x[0]
+    theta = ts/parameter_ftn[1]
+    p = (1/g0/theta/ts+1)/2
+    parameter_ftn[0]+x*parameter_ftn[1]
+
+    Nd = (parameter_ftn[0]*(0-theta/ts)-N/tn)/2/p*td
+    C = (p/td+np.average(x)/ts/v)/(1-p)/N**2
+
+    Isresult = np.array([Nd,C])
+    return Isresult
