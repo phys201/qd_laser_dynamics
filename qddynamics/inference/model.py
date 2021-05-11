@@ -7,8 +7,8 @@ import pandas as pd
 import seaborn as sns
 import statsmodels.formula.api as smf
 
-  
-# def linear_fit(x, y, sigma_y, data, g0 = 0.15E-10):       
+
+# def linear_fit(x, y, sigma_y, data, g0 = 0.15E-10):
 #     inverse_variance = 1./(sigma_y ** 2)
 #     linear_model = smf.wls(formula='y~x', data = data, weights=inverse_variance)
 #     linear_result = linear_model.fit(cov_type='fixed_scale')
@@ -41,6 +41,13 @@ class Prior:
     then be used as a function
     """
     def __init__(self, xmin, xmax):
+        '''
+        Initialize Prior Class
+        Parameters:
+        -----------
+        xmin, xmax: float
+            minimum and maximum possible values of parameters
+        '''
         self.xmin = xmin
         self.xmax = xmax
 
@@ -82,49 +89,71 @@ class LogLikelihood:
     Returns the log of the likelihood of the model.
     """
     def __init__(self, theta, x, y, sigma_y, initial_guess):
+        '''
+        Initialize LogLikelihood Class
+        Parameters:
+        -----------
+        theta: tuple
+            model parameters
+        x: ndarray
+            input currents
+        y: ndarray
+            photoluminescence data
+        sigma_y: ndarray
+            uncertainty on photoluminescence data
+        initial_guess: ndarray
+            initial guess to lasing rate equation solution
+        '''
         self.theta = theta
         self.x = x
         self.y = y
         self.sigma_y = sigma_y
         self.initial_guess = initial_guess
 
-    def rateEquations(self, z, i):
+    def rateEquations(self,z,i,
+                      Resc = 0, B = 0, confinement_factor = 0.06, d = 10E-9,
+                      tn = 1E-9, ts = 3E-12):
         '''
         Differential equations that describe the lasing behaviour of quantum dots
         for a given input current
 
-        Returns solutions to differential equations for lasing rates in steady state
+        Constants default to those reported by O'Brien et. al. (2004)
         -------------
         Parameters:
-        z := ndarray
+        z: ndarray
             initial guess for solutions
-        i := ndarray
+        i: ndarray
             input currents
+        Resc: float
+            Quantum dot carrier escape rate
+        B: float
+            carrier-phonon coefficient
+        confinement_factor: float
+            field confinment in the quantum dots
+        d: float
+            thickness of quantum well/quantum dot layer
+        tn: float
+            carrier lifetime in quantum wells and dots
+        ts: float
+            photon lifetime
+
+        Returns: ndarray
+            solutions to differential equations for lasing rates in steady state
+            S: Photon density
+            P: Dot population
+            N: Photon Number
+
         '''
         C, Nd, g0 = self.theta
-
-        ## Constants--currently same constansts as used
-        ## in O'Brien.
-        Resc = 0
-        B = 0
-        ## Nd = 1E14 # m^-2
-        confinement_factor = 0.06 # this is questionable
-        d = 10E-9 # Thickness of quantum well/quantum dot layer
         v = 2*Nd*confinement_factor/d
-        #v = 2.4E22
-        tn = 1E-9 # seconds
         td = tn
         ts = 3E-12 # seconds
-        #g0 = 0.15E-10 # m^3/seconds
-        #g0 = 1.66706437178E-8
         q = 1.60217662E-19 # Charge of electron (coulombs)
 
         S = z[0]
         p = z[1]
         N = z[2]
-        
-        # *i/self.x[0]
-        
+
         F = np.empty((3))
         F[0] = -(S/ts) + g0*v*(2*p - 1)*S
         F[1] = -(p/td) - g0*(2*p - 1)*S + ((C)*(N**2) + (B*N))*(1-p) - Resc*p
@@ -133,13 +162,16 @@ class LogLikelihood:
 
     def logllh(self):
         """
-        returns log of likelihood
-
+        Computes log likelihood probability
         Parameters:
+        -----------
             theta: model parameters (specified as a tuple)
             x: independent data (array of length N)
             y: measurements (array of length N)
             sigma_y: uncertainties on y (array of length N)
+
+        Returns: float
+            log likelihood of probability
         """
         scaling_factor = 1E2
 
@@ -167,19 +199,22 @@ class Posterior:
     '''
     class for computing posterior given lasing rate model
     returns posterior probability
-    Parameters
-    -----------
-    theta: lasing rate starting point
-    initial_guess: tuple
-        initial guess to solutions to lasing rate equations
-    C_bounds: tuple
-        lower and upper bounds on C parameter
-    Nd_bounds: tuple
-        lower and upper bounds on Nd Parameter
-    CN_exp: tuple
-        expected C and Nd
+
     '''
     def __init__(self, initial_guess, C_bounds, Nd_bounds, g0_bounds, CNg0_exp):
+        '''
+        Initialize Posterior class
+        Parameters
+        -----------
+        initial_guess: tuple
+            initial guess to solutions to lasing rate equations
+        C_bounds: tuple
+            lower and upper bounds on C parameter
+        Nd_bounds: tuple
+            lower and upper bounds on Nd Parameter
+        CN_exp: tuple
+            expected C and Nd
+        '''
         self.initial_guess = initial_guess
         self.C_bounds = C_bounds
         self.Nd_bounds = Nd_bounds
@@ -189,7 +224,8 @@ class Posterior:
     def log_posterior(self, theta, x, y, sigma_y):
         '''
         Computes the log of posterior probability given bounds on variables
-        paramters:
+        parameters:
+        ----------
         x: ndarray
             Control variables
         y: ndarray

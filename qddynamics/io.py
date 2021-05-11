@@ -1,24 +1,35 @@
 import os
 import pandas as pd
 """
-This submodule provides functions to load Quantum Dot experiment data from 
+This submodule provides functions to load Quantum Dot experiment data from
 data files
 """
 
-def get_example_data_file_path(filename):
-    # __file__ is the location of the source file currently in use (so
-    # in this case io.py). We can use it as base path to construct
-    # other paths from that should end up correct on other machines or
-    # when the package is installed
+def get_data_file_path(filename):
+    '''
+    get filepath of data
+    parameters:
+    -----------
+    filename: str
+        file directory
+    returns: str
+        os filepath of data
+    '''
     start = os.path.abspath(__file__)
     start_dir = os.path.dirname(start)
-    # If you need to go up another directory (for example if you have
-    # this function in your tests directory and your data is in the
-    # package directory one level up) you can use
-    # up_dir = os.path.split(start_dir)[0]
-    data_dir = os.path.join(start_dir)
-    return os.path.join(start_dir, filename)
+    up_dir = os.path.split(start_dir)[0]
+    data_dir = os.path.join(up_dir)
+    return os.path.join(data_dir,'data_files', filename)
 
 
 def load_data(data_file):
+    '''
+    imports data stored in CSV into pandas dataframe
+    parameters:
+    -----------
+    data_file: str
+        name of datafile (CSV)
+    returns: DataFrame
+        DataFrame of imported data
+    '''
     return pd.read_csv(data_file, sep=',')
