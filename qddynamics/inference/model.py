@@ -205,7 +205,8 @@ class Posterior:
         g0_lower, g0_upper = self.g0_bounds
         Nd_prior = UniformPrior(Nd_lower, Nd_upper).logp(Nd)
         C_prior =  UniformPrior(C_lower, C_upper).logp(C)
-        g0_prior = UniformPrior(g0_lower, g0_upper).logp(g0)
+#         g0_prior = UniformPrior(g0_lower, g0_upper).logp(g0)
+        g0_prior = JefferysPrior(g0_lower, g0_upper).logp(g0)
         likelihood = LogLikelihood(theta, x, y, sigma_y, self.initial_guess).logllh()
         return Nd_prior + C_prior + g0_prior + likelihood
 
