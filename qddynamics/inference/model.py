@@ -108,21 +108,27 @@ class LogLikelihood:
         Resc = 0
         B = 0
         ## Nd = 1E14 # m^-2
-        v = 2.4E22
+        confinement_factor = 0.06 # this is questionable
+        d = 10E-9 # Thickness of quantum well/quantum dot layer
+        v = 2*Nd*confinement_factor/d
+        #v = 2.4E22
         tn = 1E-9 # seconds
         td = tn
         ts = 3E-12 # seconds
         #g0 = 0.15E-10 # m^3/seconds
+        #g0 = 1.66706437178E-8
         q = 1.60217662E-19 # Charge of electron (coulombs)
 
         S = z[0]
         p = z[1]
-        N = z[2]*i/self.x[0]
-
+        N = z[2]
+        
+        # *i/self.x[0]
+        
         F = np.empty((3))
         F[0] = -(S/ts) + g0*v*(2*p - 1)*S
         F[1] = -(p/td) - g0*(2*p - 1)*S + ((C)*(N**2) + (B*N))*(1-p) - Resc*p
-        F[2] = (i/q) - (N/tn) - 2*Nd*(((C)*(N**2) + (B*N))*(1-p) - Resc*p)
+        F[2] = ((i)/q) - (N/tn) - 2*Nd*(((C)*(N**2) + (B*N))*(1-p) - Resc*p)
         return F
 
     def logllh(self):
@@ -135,7 +141,7 @@ class LogLikelihood:
             y: measurements (array of length N)
             sigma_y: uncertainties on y (array of length N)
         """
-
+        scaling_factor = 1E2
 
         S_out = []
         p_out = []
@@ -244,7 +250,7 @@ class Posterior:
         samples = sampler.chain[:,100:,:]
         traces = samples.reshape(-1, ndim).T
         parameter_samples = pd.DataFrame({'C': traces[0], 'Nd': traces[1], 'g0': traces[2]})
-        return parameter_samples, sampler
+        return parameter_samples, sampler, starting_positions
 
     def extract_parameters(self, parameter_samples):
         '''
@@ -268,7 +274,7 @@ class Posterior:
                                                     q['g0'][0.50]-q['g0'][0.16]))
         return q
 
-    def plot_parameters(self, parameter_samples):
+    def plot_parameters(self, parameter_samples, xname, yname):
         '''
         plot KDE of parameters when given chains
         parameters
@@ -278,5 +284,5 @@ class Posterior:
         returns: str
             variable plotted on x axis
         '''
-        joint_kde = sns.jointplot(x='C', y='Nd', data=parameter_samples, kind='scatter', s=0.2)
+        joint_kde = sns.jointplot(x=xname, y=yname, data=parameter_samples, kind='scatter', s=0.2)
         return joint_kde.x.name
