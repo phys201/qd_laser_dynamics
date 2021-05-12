@@ -12,9 +12,15 @@ class TestPriors_value(TestCase):
     Class for testing functionality of the prior function works, giving the right values
     """
     def test_uniform(self):
+        '''
+        tests uniform prior functionality
+        '''
         assert np.allclose(np.exp(UniformPrior(3, 5).logp(4)), .5)
 
     def test_jefferys(self):
+        '''
+        tests jefferys prior functionality
+        '''
         assert np.allclose(np.exp(JefferysPrior(10, 1000).logp(100)),
                            0.0021714724095162588)
 
@@ -24,13 +30,16 @@ class TestPriors_limit(TestCase):
     See if inserting the value that is off from limits still makes sense.
     """
     def test_uniform_limit(self):
+        '''
+        tests uniform prior limit definitions
+        '''
         assert np.allclose(np.exp(UniformPrior(3,5).logp(8)), 0)
     def test_jefferys_limit(self):
+        '''
+        tests jefferys prior limit definitions
+        '''
         assert np.allclose(np.exp(JefferysPrior(10,1000).logp(1)), 0)
 
-
-
-
 if __name__ == '__main__':
-#    unittest.main()
+    #unittest.main()
     nose.main()
